@@ -1,7 +1,7 @@
-from django import forms
 from markdown2 import Markdown
 from django.shortcuts import redirect, render
 from . import util
+import random
 
 from . import util
 
@@ -49,6 +49,25 @@ def new_page(request):
             return redirect(f"/wiki/{entry_title}/")
 
     return render(request, "encyclopedia/new_page.html")
+
+def edit_page(request):
+    if request.method == "POST":
+        if request.POST["action"] == "edit":
+            title= request.POST["entry"]
+            content = util.get_entry(title)
+            return render(request, "encyclopedia/edit_page.html", {"title": title, "content": content})
+
+        elif request.POST["action"] == "submit":
+            title= request.POST["entry"]
+            content = request.POST["content"].replace("\n", "")
+            util.save_entry(title, content)
+            return redirect(f"/wiki/{title}/")
+
+def random_page(request):
+    list_entries = util.list_entries()
+    num = random.randint(0, len(list_entries) - 1)
+    return redirect(f"/wiki/{list_entries[num]}/")
+
 
 def convert_to_html(entry):
     markdowner = Markdown()
